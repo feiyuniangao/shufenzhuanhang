@@ -1,0 +1,38 @@
+#研究性别对获救结果的影响
+#结果：女性获救比例远远高于男性
+SELECT Sex, count(if(Survived = 1, 1, null)) sur_num, 
+concat(round(100*count(if(Survived = 1, 1, null))/count(*), 2), '%') sur_percent FROM taitanic.train
+group by Sex;
+
+#研究船舱等级对获救结果的影响
+#结果：一等船舱乘客获救优先级很高，获救概率高达65.59%，二等船舱次之，概率为47.98%，三等船舱获救概率最低，只有23.94%
+SELECT Pclass, count(if(Survived = 1, 1, null)) sur_num, 
+concat(round(100*count(if(Survived = 1, 1, null))/count(*), 2), '%') sur_percent FROM taitanic.train
+group by Pclass
+order by sur_percent desc;
+
+#研究在不同等级船舱中性别对获救结果的影响
+#结果：一等和二等船舱乘客中，女性获救率高达90%以上，远远超过男性，三等船舱中女性获救率远低于一二等船舱，但仍超过同舱男性；一等船舱的男性获救率也大于二三等船舱的男性
+SELECT sex, Pclass, count(if(Survived = 1, 1, null)) sur_num, 
+concat(round(100*count(if(Survived = 1, 1, null))/count(*), 2), '%') sur_percent FROM taitanic.train
+group by Sex, Pclass
+order by Pclass, sur_percent desc;
+
+#研究与兄弟姐妹同行对获救结果的影响
+#结果：在有兄弟姐妹同行的情况下，同行人数越多，乘客获救率越低；但如果同行人数是一位或者两位，获救率要高于无兄弟姐妹同行的乘客（同行兄弟姐妹人数四人以上，样本过少，不予考虑）
+SELECT SibSp, count(*) num, count(if(Survived = 1, 1, null)) sur_num, 
+concat(round(100*count(if(Survived = 1, 1, null))/count(*), 2), '%') sur_percent FROM taitanic.train
+group by SibSp
+order by SibSp;
+
+#研究与老人小孩同行对获救结果的影响
+#结果：有一位或者两位老人小孩同行的情况下，乘客获救率大于55%，高于无老人小孩同行的乘客（同行老人小孩人数三人以上，样本过少，不予考虑）
+SELECT Parch, count(*) num, count(if(Survived = 1, 1, null)) sur_num, 
+concat(round(100*count(if(Survived = 1, 1, null))/count(*), 2), '%') sur_percent FROM taitanic.train
+group by Parch
+order by Parch;
+
+#推断总结：1. 女性乘客获救率总体较高，乘客逃生时，应秉持了“女士优先”的原则；
+          2. 一、二、三等船舱获救率逐渐降低，泰坦尼克号沉没时间很可能是半夜乘客熟睡时，三等船舱位于一二等船舱下层，逃生时间短；
+          3. 有一两位兄弟姐妹的乘客的获救率要比没有相应同行人员的乘客高，可能是因为落水后，一方面在体力体温上互相支撑，另一方面比其他乘客更容易引起搜救船的注意，从而获救
+          4. 一两位老人小孩同行的乘客的获救率要比没有相应同行人员的乘客高，可能是因为乘客让老人小孩及其家属优先逃生。
